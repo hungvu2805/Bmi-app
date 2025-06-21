@@ -107,17 +107,20 @@ function tinh() {
   else status = "Béo phì độ II";
 
   let ideal = (height - 100) * 0.9;
-
   let bmr = weight * 22;
   let tdee = bmr * pal;
 
   let defPercent = (bmi <= 22.9) ? 0.10 : (bmi <= 24.9) ? 0.25 : 0.35;
   let der = Math.round(tdee - tdee * defPercent);
 
-  let protein = 110;
+  let protein = 115;
   let pCalo = protein * 4;
-  let cCalo = goal === "co" ? der * 0.25 : der * 0.10;
+  let cPercent = goal === "co" ? 0.4 : 0.2;
+  let cCalo = der * cPercent;
   let fCalo = der - pCalo - cCalo;
+
+  let carb = Math.round(cCalo / 4);
+  let fat = Math.round(fCalo / 9);
 
   let output = `
     <strong>BMI:</strong> ${bmi.toFixed(1)} (${status})<br>
@@ -127,8 +130,8 @@ function tinh() {
     <strong>DER (calo mục tiêu):</strong> ${der} cal<br>
     <strong>Macro:</strong><br>
     • Protein: ${protein}g (${pCalo} cal)<br>
-    • Carb: ${Math.round(cCalo / 4)}g (${Math.round(cCalo)} cal)<br>
-    • Fat: ${Math.round(fCalo / 9)}g (${Math.round(fCalo)} cal)<br><br>
+    • Carb: ${carb}g (${Math.round(cCalo)} cal)<br>
+    • Fat: ${fat}g (${Math.round(fCalo)} cal)<br><br>
   `;
 
   let keHoach = "";
