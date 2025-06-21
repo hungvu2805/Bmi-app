@@ -4,17 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>App Tính BMI, TDEE, Macro</title>
-  <meta name="theme-color" content="#d63384" />
   <style>
     body {
       font-family: 'Arial', sans-serif;
       background-color: #ffe6f0;
       max-width: 480px;
-      margin: 30px auto;
+      margin: auto;
       padding: 20px;
       color: #333;
-      box-shadow: 0 0 10px #aaa;
-      border-radius: 20px;
     }
     h2 {
       text-align: center;
@@ -57,20 +54,21 @@
       border-radius: 6px;
       text-decoration: none;
     }
+    #history {
+      margin-top: 30px;
+      padding: 15px;
+      background: #fff3f8;
+      border: 1px dashed #d63384;
+      border-radius: 6px;
+    }
   </style>
-
-  <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7E02Y8X1WZ"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-7E02Y8X1WZ');
-  </script>
 </head>
 <body>
 
 <h2>💖 Tính BMI – TDEE – Gợi ý dinh dưỡng 💖</h2>
+
+<label>📛 Tên của bạn:</label>
+<input type="text" id="name" placeholder="VD: Linh" required>
 
 <label>📏 Cân nặng (kg):</label>
 <input type="number" id="weight" step="0.1" required>
@@ -100,16 +98,21 @@
   <a href="https://zalo.me/0981781056" target="_blank">Gửi kết quả qua Zalo</a>
 </div>
 
-<div id="history" class="result" style="display:none;"></div>
+<div id="history" style="display:none;"></div>
+
+<div style="text-align:center; margin-top:10px;">
+  <button onclick="xoaLichSu()" style="background:#999;">🗑️ Xoá lịch sử người dùng</button>
+</div>
 
 <script>
 function tinh() {
+  let name = document.getElementById('name').value.trim();
   let weight = parseFloat(document.getElementById('weight').value);
   let height = parseFloat(document.getElementById('height').value);
   let pal = parseFloat(document.getElementById('pal').value);
   let goal = document.getElementById('goal').value;
 
-  if (!weight || !height) return alert("Vui lòng nhập đầy đủ.");
+  if (!name || !weight || !height) return alert("Vui lòng nhập đầy đủ.");
 
   let heightM = height / 100;
   let bmi = weight / (heightM * heightM);
@@ -121,8 +124,10 @@ function tinh() {
   else status = "Béo phì độ II";
 
   let ideal = (height - 100) * 0.9;
+
   let bmr = weight * 22;
   let tdee = bmr * pal;
+
   let defPercent = (bmi <= 22.9) ? 0.10 : (bmi <= 24.9) ? 0.25 : 0.35;
   let der = Math.round(tdee - tdee * defPercent);
 
@@ -132,6 +137,7 @@ function tinh() {
   let fCalo = der - pCalo - cCalo;
 
   let output = `
+    <strong>👩 Tên:</strong> ${name}<br>
     <strong>BMI:</strong> ${bmi.toFixed(1)} (${status})<br>
     <strong>Cân nặng lý tưởng:</strong> ${ideal.toFixed(1)} kg<br>
     <strong>BMR:</strong> ${Math.round(bmr)} cal<br>
@@ -189,28 +195,36 @@ function tinh() {
   document.getElementById("output").innerHTML = output + keHoach;
   document.getElementById("output").style.display = "block";
 
-  // Lưu lịch sử
-  let name = prompt("Nhập tên để lưu kết quả:");
-  if (name) {
-    localStorage.setItem(name, JSON.stringify({ bmi: bmi.toFixed(1), der, tdee: Math.round(tdee) }));
-    alert(`Đã lưu kết quả cho ${name}`);
-    hienLichSu();
+  // Lưu vào localStorage
+  let lichSu = JSON.parse(localStorage.getItem("bmiHistory") || "[]");
+  lichSu.push({ name, bmi: bmi.toFixed(1), status });
+  localStorage.setItem("bmiHistory", JSON.stringify(lichSu));
+  hienLichSu();
+}
+
+function hienLichSu() {
+  let lichSu = JSON.parse(localStorage.getItem("bmiHistory") || "[]");
+  if (lichSu.length === 0) return;
+
+  let html = "<h4>📜 Lịch sử tra cứu:</h4><ul>";
+  lichSu.slice(-5).reverse().forEach(item => {
+    html += `<li>${item.name} – BMI: ${item.bmi} (${item.status})</li>`;
+  });
+  html += "</ul>";
+  document.getElementById("history").innerHTML = html;
+  document.getElementById("history").style.display = "block";
+}
+
+function xoaLichSu() {
+  if (confirm("Bạn có chắc muốn xoá toàn bộ lịch sử không?")) {
+    localStorage.clear();
+    alert("Đã xoá lịch sử.");
+    document.getElementById("history").style.display = "none";
   }
 }
 
-// Hiển thị lịch sử khi load lại trang
-function hienLichSu() {
-  let out = "<h3>📝 Lịch sử người dùng:</h3>";
-  for (let i = 0; i < localStorage.length; i++) {
-    let key = localStorage.key(i);
-    let val = JSON.parse(localStorage.getItem(key));
-    out += `<p><strong>${key}</strong>: BMI ${val.bmi}, TDEE ${val.tdee}, DER ${val.der}</p>`;
-  }
-  let hisDiv = document.getElementById("history");
-  hisDiv.innerHTML = out;
-  hisDiv.style.display = "block";
-}
-window.onload = hienLichSu;
+// Tự hiển thị lịch sử khi tải lại
+hienLichSu();
 </script>
 
 </body>
