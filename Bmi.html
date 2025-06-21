@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>App Tính BMI & Dinh dưỡng</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    label {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input, select {
+      padding: 10px;
+      width: 100%;
+      margin: 5px 0 15px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1e8449;
+    }
+    .result {
+      background: #e8f5e9;
+      padding: 20px;
+      margin-top: 20px;
+      border-left: 5px solid #2ecc71;
+      border-radius: 8px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🔍 Tính BMI, TDEE & Macro Dinh dưỡng</h2>
+
+  <label for="weight">Cân nặng (kg):</label>
+  <input type="number" id="weight" placeholder="Ví dụ: 68">
+
+  <label for="height">Chiều cao (cm):</label>
+  <input type="number" id="height" placeholder="Ví dụ: 170">
+
+  <label for="pal">Mức độ hoạt động (PAL):</label>
+  <select id="pal">
+    <option value="1.2">1.2 – Ít vận động</option>
+    <option value="1.55">1.55 – Trung bình</option>
+    <option value="1.75">1.75 – Cao</option>
+  </select>
+
+  <label for="goal">Mục tiêu:</label>
+  <select id="goal">
+    <option value="giam">Giảm mỡ</option>
+    <option value="co">Tăng cơ</option>
+  </select>
+
+  <button onclick="tinh()">TÍNH TOÁN</button>
+
+  <div id="output" class="result" style="display:none;"></div>
+
+  <script>
+    function tinh() {
+      let weight = parseFloat(document.getElementById('weight').value);
+      let height = parseFloat(document.getElementById('height').value);
+      let pal = parseFloat(document.getElementById('pal').value);
+      let goal = document.getElementById('goal').value;
+
+      if (!weight || !height) return alert("❌ Vui lòng nhập đầy đủ cân nặng và chiều cao.");
+
+      let heightM = height / 100;
+      let bmi = weight / (heightM * heightM);
+      let status = "";
+      if (bmi < 18.5) status = "Gầy";
+      else if (bmi <= 22.9) status = "Bình thường";
+      else if (bmi <= 24.9) status = "Thừa cân";
+      else if (bmi <= 29.9) status = "Béo phì độ I";
+      else status = "Béo phì độ II";
+
+      let ideal = (height - 100) * 0.9;
+      let lossMin, lossMax;
+      if (bmi <= 22.9) [lossMin, lossMax] = [weight * 0.02, weight * 0.03];
+      else if (bmi <= 24.9) [lossMin, lossMax] = [weight * 0.03, weight * 0.04];
+      else [lossMin, lossMax] = [weight * 0.04, weight * 0.06];
+
+      let bmr = weight * 22;
+      let tdee = bmr * pal;
+
+      let defPercent = (bmi <= 22.9) ? 0.10 : (bmi <= 24.9) ? 0.25 : 0.35;
+      let def = Math.round(tdee * defPercent);
+      let der = Math.round(tdee - def);
+
+      let protein = 110;
+      let pCalo = protein * 4;
+      let cCalo = goal === "co" ? der * 0.35 : der * 0.1;
+      let fCalo = der - pCalo - cCalo;
+
+      let output = `
+        <strong>BMI:</strong> ${bmi.toFixed(1)} (${status})<br>
+        <strong>Cân nặng lý tưởng:</strong> ${ideal.toFixed(1)} kg<br>
+        <strong>Giảm mỗi tháng (ước tính):</strong> ${lossMin.toFixed(1)} – ${lossMax.toFixed(1)} kg<br><br>
+        <strong>BMR (Tỉ lệ trao đổi cơ bản):</strong> ${Math.round(bmr)} cal<br>
+        <strong>TDEE (Nhu cầu năng lượng):</strong> ${Math.round(tdee)} cal<br>
+        <strong>DER (nạp calo theo mục tiêu):</strong> ${der} cal<br><br>
+        <strong>💪 Gợi ý macro:</strong><br>
+        • Protein: ${protein}g (${pCalo} cal)<br>
+        • Carb: ${Math.round(cCalo / 4)}g (${Math.round(cCalo)} cal)<br>
+        • Fat: ${Math.round(fCalo / 9)}g (${Math.round(fCalo)} cal)
+      `;
+
+      document.getElementById("output").innerHTML = output;
+      document.getElementById("output").style.display = "block";
+    }
+  </script>
+
+</body>
+</html>
