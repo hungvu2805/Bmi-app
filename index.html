@@ -1,1 +1,93 @@
-Bạn có đang ăn đúng lượng calo cơ thể cần?Sử dụng công cụ này để biết rõ chỉ số BMI, nhu cầu năng lượng, và gợi ý chế độ ăn hợp lý.➡️ Tính tại: https://hungvu2805.github.io/Bmi-app
+Bạn có đang ăn đúng lượng calo cơ thể cần?Sử dụng công cụ miễn phí này để biết rõ chỉ số BMI, nhu cầu năng lượng, và gợi ý chế độ ăn hợp lý.➡️ Tính tại: https://hungvu2805.github.io/Bmi-app
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>App Tính BMI & TDEE</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
+    label, select, input, button { display: block; margin: 10px 0; width: 100%; padding: 8px; }
+    button { background-color: #3498db; color: white; border: none; cursor: pointer; }
+    button:hover { background-color: #2980b9; }
+    .result { background: #f0f0f0; padding: 15px; margin-top: 20px; border-left: 4px solid #2ecc71; }
+  </style>
+</head>
+<body>
+
+<h2>🔍 Tính BMI, TDEE & Macro Dinh Dưỡng</h2>
+
+<label>Cân nặng (kg):</label>
+<input type="number" id="weight" required>
+
+<label>Chiều cao (cm):</label>
+<input type="number" id="height" required>
+
+<label>PAL (mức hoạt động):</label>
+<select id="pal">
+  <option value="1.2">1.2 – Ít vận động</option>
+  <option value="1.55">1.55 – Vận động vừa</option>
+  <option value="1.75">1.75 – Vận động nhiều</option>
+</select>
+
+<label>Mục tiêu:</label>
+<select id="goal">
+  <option value="giam">Giảm mỡ</option>
+  <option value="co">Tăng cơ</option>
+</select>
+
+<button onclick="tinh()">Tính</button>
+
+<div id="output" class="result" style="display:none;"></div>
+
+<script>
+function tinh() {
+  let weight = parseFloat(document.getElementById('weight').value);
+  let height = parseFloat(document.getElementById('height').value);
+  let pal = parseFloat(document.getElementById('pal').value);
+  let goal = document.getElementById('goal').value;
+
+  if (!weight || !height) return alert("Vui lòng nhập đủ cân nặng và chiều cao.");
+
+  let heightM = height / 100;
+  let bmi = weight / (heightM * heightM);
+  let status = "";
+  if (bmi < 18.5) status = "Thiếu cân";
+  else if (bmi <= 22.9) status = "Bình thường";
+  else if (bmi <= 24.9) status = "Thừa cân";
+  else if (bmi <= 29.9) status = "Béo phì độ I";
+  else status = "Béo phì độ II";
+
+  let ideal = (height - 100) * 0.9;
+
+  let bmr = weight * 22;
+  let tdee = bmr * pal;
+
+  let defPercent = goal === "co" ? -0.15 : 0.25;
+  let der = Math.round(tdee - tdee * defPercent);
+
+  let protein = Math.round(weight * (goal === "co" ? 2.2 : 1.8));
+  let pCalo = protein * 4;
+  let fat = Math.round((der * 0.25) / 9);
+  let fCalo = fat * 9;
+  let carb = Math.round((der - pCalo - fCalo) / 4);
+  let cCalo = carb * 4;
+
+  let output = `
+    <strong>BMI:</strong> ${bmi.toFixed(1)} (${status})<br>
+    <strong>Cân nặng lý tưởng:</strong> ${ideal.toFixed(1)} kg<br>
+    <strong>BMR:</strong> ${Math.round(bmr)} cal<br>
+    <strong>TDEE:</strong> ${Math.round(tdee)} cal<br>
+    <strong>DER (mục tiêu calo):</strong> ${der} cal<br>
+    <strong>Macro gợi ý:</strong><br>
+    • Protein: ${protein}g (${pCalo} cal)<br>
+    • Carb: ${carb}g (${cCalo} cal)<br>
+    • Fat: ${fat}g (${fCalo} cal)
+  `;
+
+  document.getElementById("output").innerHTML = output;
+  document.getElementById("output").style.display = "block";
+}
+</script>
+
+</body>
+</html>
