@@ -2,50 +2,120 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>App Tính BMI & TDEE</title>
+  <title>App Tính BMI & TDEE cho Nữ</title>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7E02Y8X1WZ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-7E02Y8X1WZ');
+  </script>
+
   <style>
-    body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
-    label, select, input, button { display: block; margin: 10px 0; width: 100%; padding: 8px; }
-    button { background-color: #3498db; color: white; border: none; cursor: pointer; }
-    button:hover { background-color: #2980b9; }
-    .result { background: #f0f0f0; padding: 15px; margin-top: 20px; border-left: 4px solid #2ecc71; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
+      background: #fff0f5;
+      color: #333;
+    }
+    h2 {
+      color: #e83e8c;
+      text-align: center;
+    }
+    label, select, input {
+      display: block;
+      margin: 10px 0;
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 12px;
+      background-color: #e83e8c;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #c1356f;
+    }
+    .result {
+      background: #fffafc;
+      padding: 15px;
+      margin-top: 20px;
+      border-left: 5px solid #e83e8c;
+      border-radius: 8px;
+    }
+    .share {
+      background-color: #4caf50;
+    }
+    #popup {
+      display: none;
+      background: #ffe4ec;
+      padding: 20px;
+      margin-top: 20px;
+      border: 2px dashed #ff69b4;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
 
-<h2>🔍 Tính BMI, TDEE & Macro Dinh Dưỡng</h2>
+<h2>💖 Tính BMI, TDEE & Macro – Dành cho Nữ 💖</h2>
 
-<label>Cân nặng (kg):</label>
-<input type="number" id="weight" required>
+<label>👩 Tên của bạn:</label>
+<input type="text" id="name" required>
 
-<label>Chiều cao (cm):</label>
+<label>⚖️ Cân nặng (kg):</label>
+<input type="number" id="weight" step="0.1" required>
+
+<label>📏 Chiều cao (cm):</label>
 <input type="number" id="height" required>
 
-<label>PAL (mức hoạt động):</label>
+<label>🔥 Mức độ hoạt động (PAL):</label>
 <select id="pal">
-  <option value="1.2">1.2 – Ít vận động</option>
-  <option value="1.55">1.55 – Vận động vừa</option>
-  <option value="1.75">1.75 – Vận động nhiều</option>
+  <option value="1.2">1.2 – Nghỉ ngơi</option>
+  <option value="1.55">1.55 – Trung bình</option>
+  <option value="1.75">1.75 – Năng động</option>
 </select>
 
-<label>Mục tiêu:</label>
+<label>🎯 Mục tiêu:</label>
 <select id="goal">
   <option value="giam">Giảm mỡ</option>
   <option value="co">Tăng cơ</option>
 </select>
 
-<button onclick="tinh()">Tính</button>
+<button onclick="tinh()">🔍 Tính Ngay</button>
 
 <div id="output" class="result" style="display:none;"></div>
 
+<a href="https://zalo.me/0981781056" target="_blank">
+  <button class="share">📩 Gửi kết quả qua Zalo</button>
+</a>
+
+<a href="https://zalo.me/0981781056" target="_blank">
+  <button class="share" style="background:#e83e8c;margin-top:10px;">📞 Tư vấn trực tiếp qua Zalo</button>
+</a>
+
+<div id="popup"></div>
+
 <script>
 function tinh() {
+  let name = document.getElementById('name').value;
   let weight = parseFloat(document.getElementById('weight').value);
   let height = parseFloat(document.getElementById('height').value);
   let pal = parseFloat(document.getElementById('pal').value);
   let goal = document.getElementById('goal').value;
 
-  if (!weight || !height) return alert("Vui lòng nhập đủ cân nặng và chiều cao.");
+  if (!name || !weight || !height) return alert("Vui lòng nhập đầy đủ thông tin.");
 
   let heightM = height / 100;
   let bmi = weight / (heightM * heightM);
@@ -53,38 +123,35 @@ function tinh() {
   if (bmi < 18.5) status = "Thiếu cân";
   else if (bmi <= 22.9) status = "Bình thường";
   else if (bmi <= 24.9) status = "Thừa cân";
-  else if (bmi <= 29.9) status = "Béo phì độ I";
-  else status = "Béo phì độ II";
+  else status = "Béo phì";
 
   let ideal = (height - 100) * 0.9;
-
   let bmr = weight * 22;
   let tdee = bmr * pal;
-
-  let defPercent = goal === "co" ? -0.15 : 0.25;
+  let defPercent = (bmi <= 22.9) ? 0.10 : (bmi <= 24.9) ? 0.20 : 0.35;
   let der = Math.round(tdee - tdee * defPercent);
 
-  let protein = Math.round(weight * (goal === "co" ? 2.2 : 1.8));
+  let protein = 110;
   let pCalo = protein * 4;
-  let fat = Math.round((der * 0.25) / 9);
-  let fCalo = fat * 9;
-  let carb = Math.round((der - pCalo - fCalo) / 4);
-  let cCalo = carb * 4;
+  let cCalo = goal === "co" ? der * 0.35 : der * 0.1;
+  let fCalo = der - pCalo - cCalo;
 
   let output = `
+    <strong>👩 Tên:</strong> ${name}<br>
     <strong>BMI:</strong> ${bmi.toFixed(1)} (${status})<br>
     <strong>Cân nặng lý tưởng:</strong> ${ideal.toFixed(1)} kg<br>
-    <strong>BMR:</strong> ${Math.round(bmr)} cal<br>
     <strong>TDEE:</strong> ${Math.round(tdee)} cal<br>
-    <strong>DER (mục tiêu calo):</strong> ${der} cal<br>
+    <strong>DER:</strong> ${der} cal (sau điều chỉnh)<br>
     <strong>Macro gợi ý:</strong><br>
-    • Protein: ${protein}g (${pCalo} cal)<br>
-    • Carb: ${carb}g (${cCalo} cal)<br>
-    • Fat: ${fat}g (${fCalo} cal)
+    • Protein: ${protein}g<br>
+    • Carb: ${Math.round(cCalo / 4)}g<br>
+    • Fat: ${Math.round(fCalo / 9)}g
   `;
-
   document.getElementById("output").innerHTML = output;
   document.getElementById("output").style.display = "block";
+
+  document.getElementById("popup").innerHTML = `💬 <strong>${name}</strong>, bạn cần tư vấn thêm? 👉 <a href="https://zalo.me/0981781056" target="_blank"><strong>Nhấn vào đây để chat Zalo với Hưng</strong></a>`;
+  document.getElementById("popup").style.display = "block";
 }
 </script>
 
