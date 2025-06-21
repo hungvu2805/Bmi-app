@@ -42,11 +42,11 @@
       margin-top: 20px;
       border-radius: 6px;
     }
-    .zalo, .gpt {
-      margin-top: 20px;
+    .zalo {
+      margin-top: 15px;
       text-align: center;
     }
-    .zalo a, .gpt a {
+    .zalo a {
       background: #00a1d6;
       color: white;
       padding: 10px 20px;
@@ -54,14 +54,11 @@
       border-radius: 6px;
       text-decoration: none;
     }
-    .gpt a {
-      background: #00A67E;
-    }
   </style>
 </head>
 <body>
 
-<h2>💖 Tính BMI – TDEE – Gợi ý dinh dưỡng 💖</h2>
+<h2>💖 Tính BMI – TDEE – Gợi ý Dinh dưỡng 💖</h2>
 
 <label>📏 Cân nặng (kg):</label>
 <input type="number" id="weight" step="0.1" required>
@@ -79,7 +76,7 @@
 <label>🎯 Mục tiêu:</label>
 <select id="goal">
   <option value="giam">Giảm mỡ</option>
-  <option value="co">Tăng cơ</option>
+  <option value="co">Săn chắc</option>
 </select>
 
 <button onclick="tinh()">💥 Tính ngay</button>
@@ -89,11 +86,6 @@
 <div class="zalo">
   📩 Cần tư vấn riêng? <br>
   <a href="https://zalo.me/0981781056" target="_blank">Gửi kết quả qua Zalo</a>
-</div>
-
-<div class="gpt">
-  🤖 Bạn vẫn chưa rõ nên tập – ăn thế nào?<br>
-  <a href="https://chat.openai.com" target="_blank">Mở ChatGPT để được tư vấn</a>
 </div>
 
 <script>
@@ -115,13 +107,16 @@ function tinh() {
   else status = "Béo phì độ II";
 
   let ideal = (height - 100) * 0.9;
+
   let bmr = weight * 22;
   let tdee = bmr * pal;
+
   let defPercent = (bmi <= 22.9) ? 0.10 : (bmi <= 24.9) ? 0.25 : 0.35;
   let der = Math.round(tdee - tdee * defPercent);
+
   let protein = 110;
   let pCalo = protein * 4;
-  let cCalo = goal === "co" ? der * 0.35 : der * 0.1;
+  let cCalo = goal === "co" ? der * 0.25 : der * 0.10;
   let fCalo = der - pCalo - cCalo;
 
   let output = `
@@ -149,7 +144,7 @@ function tinh() {
       <li>Thứ 7: Zumba / đi bộ</li>
       <li>Chủ nhật: Nghỉ</li>
     </ul>
-    <h3>🍽 Gợi ý ăn 1600kcal:</h3>
+    <h3>🍽 Gợi ý ăn ~${der} kcal:</h3>
     <ul>
       <li>Sáng: Yến mạch + sữa hạt + chuối</li>
       <li>Trưa: Ức gà + cơm gạo lứt + rau</li>
@@ -159,22 +154,22 @@ function tinh() {
     `;
   } else {
     keHoach = `
-    <h3>💪 Kế hoạch tập tăng cơ:</h3>
+    <h3>💗 Kế hoạch tập: Săn chắc – Dáng đẹp</h3>
     <ul>
-      <li>Thứ 2: Ngực – Tay sau</li>
-      <li>Thứ 3: Lưng – Tay trước</li>
-      <li>Thứ 4: Cardio nhẹ</li>
-      <li>Thứ 5: Vai – Mông</li>
-      <li>Thứ 6: Toàn thân tăng tải</li>
-      <li>Thứ 7: Core + Cardio</li>
-      <li>Chủ nhật: Nghỉ</li>
+      <li>Thứ 2: Cardio nhẹ + Fullbody cơ bản</li>
+      <li>Thứ 3: Mông – Đùi (Squat, Glute Bridge, Side-kick)</li>
+      <li>Thứ 4: Yoga / giãn cơ + đi bộ nhanh</li>
+      <li>Thứ 5: HIIT nhẹ + Bụng</li>
+      <li>Thứ 6: Toàn thân với tạ nhẹ, nhiều reps</li>
+      <li>Thứ 7: Zumba / Dance Cardio</li>
+      <li>Chủ nhật: Nghỉ + thiền 10 phút</li>
     </ul>
-    <h3>🍽 Gợi ý ăn 2100kcal:</h3>
+    <h3>🍽 Gợi ý ăn ~${der} kcal:</h3>
     <ul>
-      <li>Sáng: Bánh mì trứng + sữa</li>
-      <li>Trưa: Thịt bò + khoai lang + rau</li>
-      <li>Chiều: Whey + chuối</li>
-      <li>Tối: Cá thu + cơm + rau</li>
+      <li>Sáng: Bánh mì trứng + rau củ</li>
+      <li>Trưa: Cá hồi / ức gà + cơm gạo lứt + rau</li>
+      <li>Chiều: Sữa hạt + trái cây</li>
+      <li>Tối: Canh rau củ + ức gà áp chảo</li>
     </ul>
     `;
   }
