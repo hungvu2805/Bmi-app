@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="vi">
+<!DOCTYPE html><html lang="vi">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -54,72 +53,27 @@
       border-radius: 6px;
       text-decoration: none;
     }
-
-    .modal {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.5);
-      display: none;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .modal-content {
-      background: white;
-      padding: 20px;
-      max-width: 460px;
-      border-radius: 10px;
-      overflow-y: auto;
-      max-height: 90vh;
-    }
-
-    .close {
-      float: right;
-      font-size: 20px;
-      cursor: pointer;
-    }
   </style>
 </head>
-<body>
+<body><h2>💖 Tính BMI – TDEE – Gợi ý Dinh dưỡng 💖</h2><label>📏 Cân nặng (kg):</label> <input type="number" id="weight" step="0.1" required>
 
-<h2>💖 Tính BMI – TDEE – Gợi ý Dinh dưỡng 💖</h2>
+<label>📐 Chiều cao (cm):</label> <input type="number" id="height" required>
 
-<label>📏 Cân nặng (kg):</label>
-<input type="number" id="weight" step="0.1" required>
+<label>🔥 Mức độ hoạt động (PAL):</label> <select id="pal">
 
-<label>📐 Chiều cao (cm):</label>
-<input type="number" id="height" required>
-
-<label>🔥 Mức độ hoạt động (PAL):</label>
-<select id="pal">
   <option value="1.2">1.2 – Ít vận động</option>
   <option value="1.55">1.55 – Vận động vừa</option>
   <option value="1.75">1.75 – Tập luyện cao</option>
-</select>
+</select><label>🎯 Mục tiêu:</label> <select id="goal">
 
-<label>🎯 Mục tiêu:</label>
-<select id="goal">
   <option value="giam">Giảm mỡ</option>
   <option value="co">Săn chắc</option>
-</select>
+</select><button onclick="tinh()">💥 Tính ngay</button>
 
-<button onclick="tinh()">💥 Tính ngay</button>
-
-<div id="output" class="result" style="display:none;"></div>
-
-<div class="zalo">
+<div id="output" class="result" style="display:none;"></div><div class="zalo">
   📩 Cần tư vấn riêng? <br>
   <a href="https://zalo.me/0981781056" target="_blank">Gửi kết quả qua Zalo</a>
-</div>
-
-<div class="modal" id="popup">
-  <div class="modal-content">
-    <span class="close" onclick="document.getElementById('popup').style.display='none'">&times;</span>
-    <div id="popup-content"></div>
-  </div>
-</div>
-
-<script>
+</div><script>
 function tinh() {
   let weight = parseFloat(document.getElementById('weight').value);
   let height = parseFloat(document.getElementById('height').value);
@@ -138,21 +92,15 @@ function tinh() {
   else status = "Béo phì độ II";
 
   let ideal = (height - 100) * 0.9;
-
   let bmr = weight * 22;
   let tdee = bmr * pal;
-
   let defPercent = (bmi <= 22.9) ? 0.10 : (bmi <= 24.9) ? 0.25 : 0.35;
   let der = Math.round(tdee - tdee * defPercent);
 
   let protein = 120;
   let pCalo = protein * 4;
-
-  let cCalo = goal === "giam" ? der * 0.20 : der * 0.40;
+  let cCalo = goal === "co" ? der * 0.4 : der * 0.2;
   let fCalo = der - pCalo - cCalo;
-
-  let carb = Math.round(cCalo / 4);
-  let fat = Math.round(fCalo / 9);
 
   let output = `
     <strong>BMI:</strong> ${bmi.toFixed(1)} (${status})<br>
@@ -162,52 +110,36 @@ function tinh() {
     <strong>DER (calo mục tiêu):</strong> ${der} cal<br>
     <strong>Macro:</strong><br>
     • Protein: ${protein}g (${pCalo} cal)<br>
-    • Carb: ${carb}g (${Math.round(cCalo)} cal)<br>
-    • Fat: ${fat}g (${Math.round(fCalo)} cal)<br><br>
-    <button onclick="hienPopup(${der}, '${goal}')">📋 Xem lịch tập & thực đơn</button>
-  `;
-
-  document.getElementById("output").innerHTML = output;
-  document.getElementById("output").style.display = "block";
-}
-
-function hienPopup(der, goal) {
-  let thucDon = `
-    <h3>🍽 Gợi ý thực đơn ~${der} kcal</h3>
-    <b>Bữa 1:</b><br>
-    • Khoai lang 135g (135 cal)<br>
-    • Trứng gà luộc 3 quả (210 cal)<br>
-    • Xà lách 200g (21 cal)<br><br>
-
-    <b>Bữa 2:</b><br>
-    • Cơm trắng 100g (130 cal)<br>
-    • Thịt thăn heo 200g (300 cal)<br>
-    • Bắp cải 200g (50 cal)<br><br>
-
-    <b>Bữa 3:</b><br>
-    • Cơm trắng 100g (130 cal)<br>
-    • Thịt thăn bò 200g (420 cal)<br>
-    • Rau cải thìa 200g (32 cal)<br>
+    • Carb: ${Math.round(cCalo / 4)}g (${Math.round(cCalo)} cal)<br>
+    • Fat: ${Math.round(fCalo / 9)}g (${Math.round(fCalo)} cal)<br><br>
   `;
 
   let lichTap = `
-    <h3>🏋️‍♀️ Lịch tập ${goal === 'giam' ? 'giảm mỡ' : 'săn chắc'} (7 ngày):</h3>
+    <h3>📅 Lịch tập 7 ngày:</h3>
     <ul>
-      <li>Thứ 2: Goblet squat, Seated cable row, Incline push-up</li>
-      <li>Thứ 3: DB Romanian Deadlift, Lat Pulldown, Face Pull</li>
-      <li>Thứ 4: Cardio nhẹ hoặc nghỉ</li>
-      <li>Thứ 5: DB Split Squat, DB Bench Press, DB Lateral Raise</li>
-      <li>Thứ 6: Hip Thrust, TRX row, DB Shoulder Press</li>
-      <li>Thứ 7: Zumba / Dance Cardio</li>
-      <li>Chủ nhật: Thiền, nghỉ ngơi</li>
+      <li><b>Thứ 2:</b> Fullbody Day 1 – Goblet squat, Seated cable row, Incline push up, Leg curl, Wall sit</li>
+      <li><b>Thứ 3:</b> Metcon Day 1 – Inch Worm - Hand In, Med Ball Slam, Low Impact Mountain Climber, Side Plank</li>
+      <li><b>Thứ 4:</b> Fullbody Day 2 – DB Romanian Deadlift, Shoulder Press, Lat Pulldown, Leg Extension, Face Pull</li>
+      <li><b>Thứ 5:</b> Metcon Day 2 – Inch Worm - Foot In, Med Ball Pass, Farmer Walk, Front Plank</li>
+      <li><b>Thứ 6:</b> Fullbody Day 3 – DB Split Squat, Lying DB Row, DB Bench Press, Leg Curl, DB Lateral Raise</li>
+      <li><b>Thứ 7:</b> Metcon Day 3 – Squat to OH Press, Battle Ropes, Mountain Climber, Side Plank</li>
+      <li><b>Chủ nhật:</b> Fullbody Day 4 – Hip Thrust, TRX Row, DB Shoulder Press, Leg Extension, Plank</li>
     </ul>
-    <i>👉 Muốn lịch tập tại nhà không cần tạ? Ib Zalo.</i>
+    <i>👉 Muốn lịch tập tại nhà không cần tạ? Ib Zalo nhé.</i>
   `;
 
-  document.getElementById("popup-content").innerHTML = thucDon + lichTap;
-  document.getElementById("popup").style.display = "flex";
-}
-</script>
+  let thucDon = `
+    <h3>🍽 Gợi ý thực đơn ~1400 kcal:</h3>
+    <ul>
+      <li><b>Bữa sáng:</b> Khoai lang 135g, Trứng 3 quả, Xà lách 200g (~366 cal)</li>
+      <li><b>Bữa trưa:</b> Cơm 100g, Thịt heo 200g, Bắp cải 200g (~480 cal)</li>
+      <li><b>Bữa tối:</b> Cơm 100g, Thịt bò 200g, Cải thìa 200g (~550 cal)</li>
+    </ul>
+    <p><b>Tổng:</b> ~1400 kcal | Protein ~120g | Carb ~70g | Fat ~71g</p>
+  `;
 
-</body>
+  document.getElementById("output").innerHTML = output + lichTap + thucDon;
+  document.getElementById("output").style.display = "block";
+}
+</script></body>
 </html>
