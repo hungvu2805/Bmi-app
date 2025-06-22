@@ -1,11 +1,12 @@
-<!DOCTYPE html><html lang="vi">
+<!DOCTYPE html>
+<html lang="vi">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>App Tính BMI, TDEE, Macro</title>
   <style>
     body {
-      font-family: 'Arial', sans-serif;
+      font-family: Arial, sans-serif;
       background-color: #ffe6f0;
       max-width: 480px;
       margin: auto;
@@ -34,7 +35,7 @@
     button:hover {
       background-color: #b82d6b;
     }
-    .result {
+    .result, .history {
       background: #fff;
       padding: 15px;
       border-left: 4px solid #d63384;
@@ -53,28 +54,78 @@
       border-radius: 6px;
       text-decoration: none;
     }
+    .popup {
+      display: none;
+      position: fixed;
+      top: 5%;
+      left: 5%;
+      width: 90%;
+      max-height: 90%;
+      overflow-y: auto;
+      background: white;
+      border: 2px solid #d63384;
+      border-radius: 8px;
+      padding: 15px;
+      z-index: 1000;
+    }
+    .popup h3 {
+      color: #d63384;
+    }
+    .popup button {
+      margin-top: 10px;
+      background-color: #888;
+    }
   </style>
 </head>
-<body><h2>💖 Tính BMI – TDEE – Gợi ý Dinh dưỡng 💖</h2><label>📏 Cân nặng (kg):</label> <input type="number" id="weight" step="0.1" required>
+<body>
 
-<label>📐 Chiều cao (cm):</label> <input type="number" id="height" required>
+<h2>💖 Tính BMI – TDEE – Gợi ý Dinh dưỡng 💖</h2>
 
-<label>🔥 Mức độ hoạt động (PAL):</label> <select id="pal">
+<label>👤 Tên của bạn (tuỳ chọn):</label>
+<input type="text" id="name">
 
+<label>📏 Cân nặng (kg):</label>
+<input type="number" id="weight" step="0.1" required>
+
+<label>📐 Chiều cao (cm):</label>
+<input type="number" id="height" required>
+
+<label>🔥 Mức độ hoạt động (PAL):</label>
+<select id="pal">
   <option value="1.2">1.2 – Ít vận động</option>
   <option value="1.55">1.55 – Vận động vừa</option>
   <option value="1.75">1.75 – Tập luyện cao</option>
-</select><label>🎯 Mục tiêu:</label> <select id="goal">
+</select>
 
+<label>🎯 Mục tiêu:</label>
+<select id="goal">
   <option value="giam">Giảm mỡ</option>
   <option value="co">Săn chắc</option>
-</select><button onclick="tinh()">💥 Tính ngay</button>
+</select>
 
-<div id="output" class="result" style="display:none;"></div><div class="zalo">
+<button onclick="tinh()">💥 Tính ngay</button>
+
+<div id="output" class="result" style="display:none;"></div>
+
+<div class="zalo">
   📩 Cần tư vấn riêng? <br>
   <a href="https://zalo.me/0981781056" target="_blank">Gửi kết quả qua Zalo</a>
-</div><script>
+</div>
+
+<div id="popup" class="popup">
+  <div id="popupContent"></div>
+  <button onclick="closePopup()">Đóng</button>
+</div>
+
+<div id="history" class="history" style="display:none;">
+  <h3>Lịch sử tra cứu:</h3>
+  <ul id="historyList"></ul>
+  <button onclick="clearHistory()">🗑 Xoá lịch sử</button>
+</div>
+
+<script>
 function tinh() {
+  let name = document.getElementById("name").value.trim();
   let weight = parseFloat(document.getElementById('weight').value);
   let height = parseFloat(document.getElementById('height').value);
   let pal = parseFloat(document.getElementById('pal').value);
@@ -84,18 +135,17 @@ function tinh() {
 
   let heightM = height / 100;
   let bmi = weight / (heightM * heightM);
-  let status = "";
-  if (bmi < 18.5) status = "Thiếu cân";
-  else if (bmi <= 22.9) status = "Trung bình";
-  else if (bmi <= 24.9) status = "Thừa cân";
-  else if (bmi <= 29.9) status = "Béo phì độ I";
-  else status = "Béo phì độ II";
-
+  let status = bmi < 18.5 ? "Thiếu cân" :
+               bmi <= 22.9 ? "Trung bình" :
+               bmi <= 24.9 ? "Thừa cân" :
+               bmi <= 29.9 ? "Béo phì độ I" : "Béo phì độ II";
   let ideal = (height - 100) * 0.9;
   let bmr = weight * 22;
   let tdee = bmr * pal;
-  let defPercent = (bmi <= 22.9) ? 0.10 : (bmi <= 24.9) ? 0.25 : 0.35;
+  let defPercent = bmi <= 22.9 ? 0.10 : bmi <= 24.9 ? 0.25 : 0.35;
   let der = Math.round(tdee - tdee * defPercent);
+  let thieuMoiNgay = Math.round(tdee - der);
+  let giamThang = (thieuMoiNgay * 30 / 7700).toFixed(1); // 7700kcal = 1kg mỡ
 
   let protein = 120;
   let pCalo = protein * 4;
@@ -108,38 +158,77 @@ function tinh() {
     <strong>BMR:</strong> ${Math.round(bmr)} cal<br>
     <strong>TDEE:</strong> ${Math.round(tdee)} cal<br>
     <strong>DER (calo mục tiêu):</strong> ${der} cal<br>
+    <strong>Ước tính giảm mỗi tháng:</strong> ${giamThang} kg<br>
     <strong>Macro:</strong><br>
     • Protein: ${protein}g (${pCalo} cal)<br>
-    • Carb: ${Math.round(cCalo / 4)}g (${Math.round(cCalo)} cal)<br>
-    • Fat: ${Math.round(fCalo / 9)}g (${Math.round(fCalo)} cal)<br><br>
+    • Carb: ${Math.round(cCalo/4)}g (${Math.round(cCalo)} cal)<br>
+    • Fat: ${Math.round(fCalo/9)}g (${Math.round(fCalo)} cal)<br>
   `;
 
-  let lichTap = `
-    <h3>📅 Lịch tập 7 ngày:</h3>
-    <ul>
-      <li><b>Thứ 2:</b> Fullbody Day 1 – Goblet squat, Seated cable row, Incline push up, Leg curl, Wall sit</li>
-      <li><b>Thứ 3:</b> Metcon Day 1 – Inch Worm - Hand In, Med Ball Slam, Low Impact Mountain Climber, Side Plank</li>
-      <li><b>Thứ 4:</b> Fullbody Day 2 – DB Romanian Deadlift, Shoulder Press, Lat Pulldown, Leg Extension, Face Pull</li>
-      <li><b>Thứ 5:</b> Metcon Day 2 – Inch Worm - Foot In, Med Ball Pass, Farmer Walk, Front Plank</li>
-      <li><b>Thứ 6:</b> Fullbody Day 3 – DB Split Squat, Lying DB Row, DB Bench Press, Leg Curl, DB Lateral Raise</li>
-      <li><b>Thứ 7:</b> Metcon Day 3 – Squat to OH Press, Battle Ropes, Mountain Climber, Side Plank</li>
-      <li><b>Chủ nhật:</b> Fullbody Day 4 – Hip Thrust, TRX Row, DB Shoulder Press, Leg Extension, Plank</li>
-    </ul>
-    <i>👉 Muốn lịch tập tại nhà không cần tạ? Ib Zalo nhé.</i>
-  `;
-
-  let thucDon = `
-    <h3>🍽 Gợi ý thực đơn ~1400 kcal:</h3>
-    <ul>
-      <li><b>Bữa sáng:</b> Khoai lang 135g, Trứng 3 quả, Xà lách 200g (~366 cal)</li>
-      <li><b>Bữa trưa:</b> Cơm 100g, Thịt heo 200g, Bắp cải 200g (~480 cal)</li>
-      <li><b>Bữa tối:</b> Cơm 100g, Thịt bò 200g, Cải thìa 200g (~550 cal)</li>
-    </ul>
-    <p><b>Tổng:</b> ~1400 kcal | Protein ~120g | Carb ~70g | Fat ~71g</p>
-  `;
-
-  document.getElementById("output").innerHTML = output + lichTap + thucDon;
+  document.getElementById("output").innerHTML = output;
   document.getElementById("output").style.display = "block";
+
+  showPopup(der);
+
+  if (name) saveHistory(name, bmi.toFixed(1), der);
+  loadHistory();
 }
-</script></body>
+
+function showPopup(der) {
+  const content = `
+    <h3>📅 Lịch tập 7 ngày (4 fullbody + 3 metcon):</h3>
+    <ul>
+      <li>Thứ 2: Goblet squat, Incline push up, Wall sit</li>
+      <li>Thứ 3: Metcon – Inch Worm, Slam, Side plank</li>
+      <li>Thứ 4: Romanian DL, Lat Pulldown, Face Pull</li>
+      <li>Thứ 5: Metcon – Inch Worm, Farmer Walk, Plank</li>
+      <li>Thứ 6: DB Split squat, DB Bench, Lateral Raise</li>
+      <li>Thứ 7: Metcon – Squat Press, Battle Rope</li>
+      <li>CN: Nghỉ / thiền</li>
+    </ul>
+    <h3>🍽 Thực đơn ~1400 calo:</h3>
+    <ul>
+      <li><strong>Sáng:</strong> Khoai lang 135g, 3 trứng luộc, Xà lách 200g</li>
+      <li><strong>Trưa:</strong> Cơm 100g, Thịt heo 200g, Bắp cải 200g</li>
+      <li><strong>Tối:</strong> Cơm 100g, Thịt bò 200g, Rau cải 200g</li>
+    </ul>
+    👉 Muốn lịch tập tại nhà không cần tạ? <a href="https://zalo.me/0981781056" target="_blank">ib Coach Hưng</a>
+  `;
+  document.getElementById("popupContent").innerHTML = content;
+  document.getElementById("popup").style.display = "block";
+}
+
+function closePopup() {
+  document.getElementById("popup").style.display = "none";
+}
+
+function saveHistory(name, bmi, der) {
+  let list = JSON.parse(localStorage.getItem("bmiHistory") || "[]");
+  list.push({ name, bmi, der });
+  localStorage.setItem("bmiHistory", JSON.stringify(list));
+}
+
+function loadHistory() {
+  let list = JSON.parse(localStorage.getItem("bmiHistory") || "[]");
+  let ul = document.getElementById("historyList");
+  ul.innerHTML = "";
+  if (list.length === 0) {
+    document.getElementById("history").style.display = "none";
+    return;
+  }
+  list.forEach(i => {
+    let li = document.createElement("li");
+    li.textContent = `${i.name}: BMI ${i.bmi}, DER ${i.der} cal`;
+    ul.appendChild(li);
+  });
+  document.getElementById("history").style.display = "block";
+}
+
+function clearHistory() {
+  localStorage.removeItem("bmiHistory");
+  loadHistory();
+}
+</script>
+
+</body>
 </html>
